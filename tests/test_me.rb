@@ -6,14 +6,14 @@
 #  vim:ts=2:sw=2:et
 #
 $:.unshift File.join(File.dirname(__FILE__),'.','../lib')
-require 'rundeck-openstack'
+require 'rundeck-nodes'
 require 'pp'
 
 options = {
-  :config => './config.yaml'
+  :config => './config.yaml',
+  :debug  => false
 }
 
-deck = RunDeckOpenstack.load( options )
+nodes = RundeckNodes.load options
 # step: perform a classify
-puts deck.classify
-
+nodes.list

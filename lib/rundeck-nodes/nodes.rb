@@ -5,46 +5,37 @@
 #  vim:ts=2:sw=2:et
 #
 $:.unshift File.join(File.dirname(__FILE__),'.','./')
-
-require 'erb'
-require 'config'
-require 'utils'
-require 'logging'
+require 'misc/logging'
+require 'misc/utils'
+require 'misc/configuration'
+require 'render'
+require 'providers'
+require 'pp'
 
 module RundeckNodes
   class Nodes
-    include RundeckNodes::Utils
     include RundeckNodes::Logging
+    include RundeckNodes::Utils
+    include RundeckNodes::Configuration
+    include RundeckNodes::Providers
+    include RundeckNodes::Render
 
-    attr_reader :options
-
-    def initialize options
+    def initialize configuration
       # step: validate the configuration file
-      @options = options
-      @nodes   = []
+      @settings = load_configuration( options( configuration ) )
     end
 
-    def classify filter = {}
+    def list filter = {}
       begin
-        # step: check if the configuration has changed and if so reload it
-        settings.reload if settings.changed?
-        # step: specify the defaults
-        filter['cluster'] ||= '.*'
-        filter['hostname'] ||= '.*'
-        # step: iterate and pull the nodes
-        @nodes = []
-        settings['openstack'].each do |os|
-          # step: are we filtering our certain openstack clusters
-          next unless os['name'] =~ /#{filter['cluster']}/
-          # step: classifiy the nodes
-          retrieve_nodes( os ).each do |node|
-            # step: filter out anything we don't care about
-            next unless node['hostname'] =~ /#{filter['hostname']}/
-            @nodes << node
-          end
+        # step: iterate the clouds (filtering)
+        clouds filter[:clouds] do |name,config|
+          debug "list: cloud: #{name}, provider: #{config['provider']}"
+          # step: find a provider for this cloud
+          plugin = provider name, config['provider'], config
+          # step: get me a list of the nodes
+          debug "list: provider: #{name}, pulling the hosts from this provider"
+          render plugin.list
         end
-        # step: if requested, lets template the output
-        ERB.new( settings['erb'], nil, '-' ).result( binding )
       rescue Exception => e
         puts 'classify: we have encountered an error: %s' % [ e.message ]
         raise Exception, e.message
@@ -52,24 +43,12 @@ module RundeckNodes
     end
 
     private
-    def openstack_connection credentials
-      debug 'openstack_connection: attemping to connect to openstack: %s' % [ credentials['auth_url'] ]
-      connection = ::Fog::Compute.new( :provider => :OpenStack,
-        :openstack_auth_url   => credentials['auth_url'],
-        :openstack_api_key    => credentials['api_key'],
-        :openstack_username   => credentials['username'],
-        :openstack_tenant     => credentials['tenant']
-      )
-      debug 'successfully connected to openstack, username: ' << credentials['username'] << ' auth: ' << credentials['auth_url']
-      connection
-    end
-
-    def retrieve_nodes credentials
-      debug 'retrieve_nodes: retrieving a list of the nodes from openstack: ' << credentials['auth_url']
-      # step: get a connection to openstack
-      connection = openstack_connection( credentials )
-      # step: retrieve the nodes
-
+    def clouds filter = nil, &block
+      filter = '.*' unless filter
+      settings['clouds'].each_pair do |name,cfg|
+        next unless name =~ /#{filter}/
+        yield name,cfg if block_given?
+      end
     end
 
     def apply_node_tags node
@@ -79,20 +58,6 @@ module RundeckNodes
           ( node['tags'] || [] ) << settings['tags'][regex]
         end
       end
-    end
-
-    def settings options = @options
-      @config ||= RunDeckOpenstack::Config::new options[:config], options
-    end
-
-    def options
-      @options ||= default_options
-    end
-
-    def default_options
-      {
-        :config => "#{ENV['HOME']}/openstack.yaml"
-      }
     end
   end
 end

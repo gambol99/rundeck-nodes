@@ -11,8 +11,8 @@ module RundeckNodes
       raise ArgumentError, 'the file %s does not exist'   % [ filename ]  unless File.exists? filename
       raise ArgumentError, 'the file %s is not a file'    % [ filename ]  unless File.file? filename
       raise ArgumentError, 'the file %s is not readable'  % [ filename ]  unless File.readable? filename
-      if writable
-        raise ArgumentError, "the filename #{filename} is not writable"   unless File.writable? filename
+      if writeable
+        raise ArgumentError, "the filename #{filename} is not writeable"  unless File.writable? filename
       end
       filename
     end

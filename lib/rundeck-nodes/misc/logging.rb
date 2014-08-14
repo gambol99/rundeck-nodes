@@ -4,32 +4,31 @@
 #
 #  vim:ts=2:sw=2:et
 #
-
 module RundeckNodes
   module Logging
-    def info(string, options = {})
+    def info string
       print formatted_string("[info] #{dated_string(string)}", options) if options[:verbose]
     end
 
-    def debug(string, options = {})
+    def debug string
       print formatted_string("[debug] #{dated_string(string)}", options) if options[:debug]
     end
 
-    def notify(string, options = {})
+    def notify string
       print formatted_string(string, options)
     end
     alias_method :verbose, :notify
 
-    def announce(string, options = {})
+    def announce string
       print formatted_string( string, { :color => :white }.merge(options))
     end
     alias_method :verbose, :announce
 
-    def warn(string)
+    def warn string
       Kernel.warn formatted_string(string, :symbol => "*", :color => :orange, :newline => false )
     end
 
-    def error(string)
+    def error string
       Kernel.warn formatted_string(string, :symbol => "!", :color => :red, :newline => false )
     end
 
@@ -47,7 +46,7 @@ module RundeckNodes
       string = string.to_s
       string = string.colorize( options[:color] ) if options[:color]
       string << "\n" unless options[:newline] == false
-      "#{symbol}#{string}"
+      "#{symbol}#{string} [#{self.class}]"
     end
   end
 end

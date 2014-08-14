@@ -6,8 +6,8 @@
 #
 require 'yaml'
 
-module RunDeckOpenstack
-  class Config
+module RundeckNodes
+  module Configuration
     Default_Template = <<-EOF
 ---
 <% @nodes.each do |node| %>
@@ -22,45 +22,38 @@ module RunDeckOpenstack
   <% end -%>
 <% end -%>
 EOF
-    attr_reader :config
 
-    def initialize filename, options
-      # step: check we have all the options
-      @config   = validate_configuration filename, options
-      @options  = options
-      @filename = filename
+    def settings
+      @settings ||= {}
     end
 
-    def changed?
-      ( @modified < File.mtime( @filename ) ) ? true : false
+    def options initial_configutation = nil
+      @options ||= initial_configutation || default_options
     end
 
-    def reload
-      @config = validate_configuration @filename, @options
-    end
-
-    def [](key)
-      @config[key]
+    def default_options
+      {
+        :config => "#{ENV['HOME']}/openstack.yaml",
+        :debug  => false,
+        :color  => false
+      }
     end
 
     private
-    def validate_configuration filename = @filename, options = @options
-      # step: get the modified time
-      @modified = File.mtime filename
+    def load_configuration options = {}
+      # step: check the configuration file exists
+      validate_file options[:config]
       # step: read in the configution file
-      config = YAML.load(File.read(filename))
-      # step: check we have erveything we need
+      config = YAML.load(File.read(options[:config]))
+      # step: check we have everything we need
       raise ArgumentError, 'the configuration does not contain the clouds config' unless config['clouds']
       raise ArgumentError, 'the clouds field should be an hash'                   unless config['clouds'].is_a? Hash
       # step: we have to make sure we have 0.{username,api_key,auth_uri}
       config['clouds'].each_pair do |name,cfg|
         raise ArgumentError, "the config for: #{name} does not include a provider" unless cfg['provider']
-
-        raise ArgumentError, 'the credentials for a openstack cluster must have a name field' unless os.has_key? 'name'
-
       end
       # step: lets validate templates or inject the default one
-      config['erb'] = config['template'] || Default_Template
+      config[:erb] = config['template'] || Default_Template
       config
     end
   end
