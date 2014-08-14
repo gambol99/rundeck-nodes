@@ -7,9 +7,12 @@
 require 'erb'
 
 module RundeckNodes
-  module Render
-    def render nodes
+  class Render
+    def initialize nodes = []
       @nodes = nodes
+    end
+
+    def render
       puts ERB.new( settings[:erb], nil, '-' ).result( binding )
     end
   end

@@ -25,7 +25,7 @@ module RundeckNodes
       @settings = load_configuration( options( configuration ) )
     end
 
-    def list filter = {}
+    def render filter = {}
       begin
         # step: iterate the clouds (filtering)
         clouds filter[:clouds] do |name,config|
@@ -34,7 +34,7 @@ module RundeckNodes
           plugin = provider name, config['provider'], config
           # step: get me a list of the nodes
           debug "list: provider: #{name}, pulling the hosts from this provider"
-          render plugin.list
+          RundeckNodes::Render.new append_tags( plugin.list )
         end
       rescue Exception => e
         puts 'classify: we have encountered an error: %s' % [ e.message ]
@@ -51,13 +51,15 @@ module RundeckNodes
       end
     end
 
-    def apply_node_tags node
-      if settings['tags']
-        settings['tags'].keys.each do |regex|
-          next unless node['hostname'] =~ /#{regex}/
-          ( node['tags'] || [] ) << settings['tags'][regex]
+    def append_tags nodes = []
+      return nodes if settings['tags'].nil? or settings['tags'].empty?
+      nodes.each do |host|
+        settings['tags'].each do |regex|
+          next unless host['hostname'] =~ /#{regex}/
+          ( host['tags'] || [] ) << settings['tags'][regex]
         end
       end
+      nodes
     end
   end
 end

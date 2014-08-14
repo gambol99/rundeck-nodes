@@ -9,8 +9,8 @@ module RundeckNodes
 
   require "#{ROOT}/rundeck-nodes/version"
 
-  autoload :Version,    "#{ROOT}/rundeck-nodes/version"
-  autoload :Nodes,      "#{ROOT}/rundeck-nodes/nodes"
+  autoload :Version, "#{ROOT}/rundeck-nodes/version"
+  autoload :Nodes,   "#{ROOT}/rundeck-nodes/nodes"
 
   def self.version
     RundeckNodes::VERSION
