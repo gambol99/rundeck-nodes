@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
     s.name        = "rundeck-nodes"
     s.version     = RundeckNodes::VERSION
     s.platform    = Gem::Platform::RUBY
-    s.date        = '2014-05-22'
+    s.date        = '2014-07-15'
     s.authors     = ["Rohith Jayawardene"]
     s.email       = 'gambol99@gmail.com'
     s.homepage    = 'http://rubygems.org/gems/rundeck-nodes'
