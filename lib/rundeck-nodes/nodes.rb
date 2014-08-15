@@ -10,6 +10,7 @@ require 'misc/utils'
 require 'misc/configuration'
 require 'render'
 require 'providers'
+require 'thread'
 
 module RundeckNodes
   class Nodes
@@ -23,23 +24,38 @@ module RundeckNodes
       @settings = load_configuration( options( configuration ) )
     end
 
-    def render filter = {}
-      # step: iterate the clouds (filtering)
-      clouds filter[:clouds] do |cloud_name,config|
-        debug "list: cloud: #{cloud_name}, provider: #{config['provider']}"
-        # step: find a provider for this cloud
-        plugin = provider cloud_name, config['provider'], config
-        # step: get me a list of the nodes
-        debug "list: provider: #{cloud_name}, pulling the hosts from this provider"
-        nodes = plugin.list
-        # step: append the tags to the nodes
-        nodes = append_tags( cloud_name, nodes )
-        # step: render the nodes to console
-        puts RundeckNodes::Render.new( nodes, settings[:erb] ).render
+    def render cloud_filter, threaded = false
+      clouds( cloud_filter ) do |cloud_name,config|
+        if threaded
+          @threads ||= []
+          @sources ||= {}
+          @threads << Thread::new do
+            source cloud_name, config do |data|
+              @sources[cloud_name] = data
+            end
+          end
+          @threads.each(&:join)
+          @sources.each_pair { |name,data| puts data }
+        else
+          source( cloud_name, config ) { |data| puts data }
+        end
       end
     end
 
     private
+    def source cloud_name, config, &block
+      debug "render: cloud: #{cloud_name}, provider: #{config['provider']}"
+      # step: find a provider for this cloud
+      plugin = provider cloud_name, config['provider'], config
+      # step: get me a list of the nodes
+      debug "render: provider: #{cloud_name}, pulling the hosts from this provider"
+      nodes = plugin.list || []
+      # step: append the tags to the nodes
+      nodes = append_tags( cloud_name, nodes )
+      # step: render the nodes to console
+      yield RundeckNodes::Render.new( nodes, settings[:erb] ).render
+    end
+
     def clouds filter = nil, &block
       filter = '.*' unless filter
       settings['clouds'].each_pair do |name,cfg|
@@ -65,4 +81,3 @@ module RundeckNodes
     end
   end
 end
-

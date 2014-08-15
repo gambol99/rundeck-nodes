@@ -21,8 +21,8 @@ module RundeckNodes
             'user_id'   => instance.user_id,
             'flavor_id' => instance.flavor_id,
             'image_id'  => instance.image_id,
-            'flavor'    => flavor_name( instance.flavor_id ) || 'flavor deleted',
-            'image'     => image_name( instance.image_id ) || 'image deleted'
+            'flavor'    => flavor_name( instance.flavor_id ) || 'deleted',
+            'image'     => image_name( instance.image_id ) || 'deleted'
           }
           # step: find the image
           nodes << node

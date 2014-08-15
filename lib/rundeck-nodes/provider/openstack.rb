@@ -26,11 +26,10 @@ module RundeckNodes
             'tags'       => [],
             'tenant_id'  => instance.tenant_id,
             'user_id'    => instance.user_id,
-            'hypervisor' => instance.os_ext_srv_attr_host,
             'flavor_id'  => instance.flavor['id'],
             'image_id'   => instance.image['id'],
-            'flavor'     => flavor_name( instance.flavor['id'] ) || 'flavor deleted',
-            'image'      => image_name( instance.image['id'] ) || 'image deleted'
+            'flavor'     => flavor_name( instance.flavor['id'] ) || 'deleted',
+            'image'      => image_name( instance.image['id'] ) || 'deleted'
           }
           nodes << node
         end
