@@ -21,7 +21,7 @@ module RundeckNodes
     end
 
     def provider id, name, configuration = {}
-      pluginName = "RundeckNodes::Providers::#{name}"
+      pluginName = name
       raise ArgumentError, "the provider class: #{pluginName} does not exists" unless provider? name
       debug "provider: classes in module: " << RundeckNodes::Providers.constants.join(', ')
       plugin = RundeckNodes::Providers.const_get( pluginName ).new( id, options, configuration )

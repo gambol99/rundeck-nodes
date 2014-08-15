@@ -14,7 +14,7 @@ module RundeckNodes
 <%= node['hostname'] %>:
   hostname: <%= node['hostname'] %>
   nodename: <%= node['hostname'].split('.').first %>
-  tags: '<%= node['tags'].concat( [ node['cluster'] ] ).join(', ') %>'
+  tags: '<%= node['tags'].join(', ') %>'
   username: rundeck
   <% node.each_pair do |k,v| -%>
 <%- next if k =~ /^(hostname|tags)$/ -%>
