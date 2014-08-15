@@ -5,15 +5,17 @@
 #  vim:ts=4:sw=4:et
 #
 require 'erb'
+require 'pp'
 
 module RundeckNodes
   class Render
-    def initialize nodes = []
-      @nodes = nodes
+    def initialize nodes = [], template
+      @nodes    = nodes
+      @template = template
     end
 
     def render
-      puts ERB.new( settings[:erb], nil, '-' ).result( binding )
+      ERB.new( @template, nil, '-' ).result( binding )
     end
   end
 end

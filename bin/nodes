@@ -5,6 +5,7 @@
 #
 #  vim:ts=4:sw=4:et
 #
+$:.unshift File.join(File.dirname(__FILE__),'.','../lib')
 require 'rubygems' if RUBY_VERSION < '1.9.0'
 require 'optionscrapper'
 require 'rundeck-nodes'
@@ -25,7 +26,7 @@ module RundeckNodes
     private
     def nodes
       clouds_filter = ( options[:clouds].empty? ) ? ".*" : options[:clouds].join('|')
-      puts render.list( { :clouds => clouds_filter } )
+      render.render( { :clouds => clouds_filter } )
     end
 
     def options default_options = nil
@@ -46,10 +47,10 @@ module RundeckNodes
     end
 
     def parser
-      @parser ||= OptionScrapper::new do |x|
+      @parser ||= OptionScrapper::new do |o|
         o.on( '-c FILE', '--config FILE', "the configuration file containing the settings (defaults: #{options[:config]})" ) { |x| options[:config] = x }
         o.on( '-C CLOUD', '--cloud CLOUD', "only include certain clouds, defaults to all" ) { |x| options[:clouds] << x }
-        o.on( '-d', '--debug', 'switch on debugging mode' ) { |x| options[:debug] = false }
+        o.on( '-d', '--debug', 'switch on debugging mode' ) { |x| options[:debug] = true }
       end
     end
   end

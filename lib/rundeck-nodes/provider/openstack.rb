@@ -23,7 +23,7 @@ module RundeckNodes
             'state'      => instance.state,
             'key_name'   => instance.key_name,
             'created'    => instance.created,
-            'tags'       => instance.metadata.to_hash.values,
+            'tags'       => [],
             'tenant_id'  => instance.tenant_id,
             'user_id'    => instance.user_id,
             'hypervisor' => instance.os_ext_srv_attr_host,

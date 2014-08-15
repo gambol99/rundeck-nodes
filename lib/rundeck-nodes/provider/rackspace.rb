@@ -17,7 +17,7 @@ module RundeckNodes
             'state'     => instance.state,
             'key_name'  => instance.key_name,
             'created'   => instance.created,
-            'tags'      => instance.metadata.to_hash.values,
+            'tags'      => [],
             'user_id'   => instance.user_id,
             'flavor_id' => instance.flavor_id,
             'image_id'  => instance.image_id,

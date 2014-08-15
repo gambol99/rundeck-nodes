@@ -10,7 +10,6 @@ require 'misc/utils'
 require 'misc/configuration'
 require 'render'
 require 'providers'
-require 'pp'
 
 module RundeckNodes
   class Nodes
@@ -18,7 +17,6 @@ module RundeckNodes
     include RundeckNodes::Utils
     include RundeckNodes::Configuration
     include RundeckNodes::Providers
-    include RundeckNodes::Render
 
     def initialize configuration
       # step: validate the configuration file
@@ -26,19 +24,18 @@ module RundeckNodes
     end
 
     def render filter = {}
-      begin
-        # step: iterate the clouds (filtering)
-        clouds filter[:clouds] do |name,config|
-          debug "list: cloud: #{name}, provider: #{config['provider']}"
-          # step: find a provider for this cloud
-          plugin = provider name, config['provider'], config
-          # step: get me a list of the nodes
-          debug "list: provider: #{name}, pulling the hosts from this provider"
-          RundeckNodes::Render.new append_tags( plugin.list )
-        end
-      rescue Exception => e
-        puts 'classify: we have encountered an error: %s' % [ e.message ]
-        raise Exception, e.message
+      # step: iterate the clouds (filtering)
+      clouds filter[:clouds] do |cloud_name,config|
+        debug "list: cloud: #{cloud_name}, provider: #{config['provider']}"
+        # step: find a provider for this cloud
+        plugin = provider cloud_name, config['provider'], config
+        # step: get me a list of the nodes
+        debug "list: provider: #{cloud_name}, pulling the hosts from this provider"
+        nodes = plugin.list
+        # step: append the tags to the nodes
+        nodes = append_tags( cloud_name, nodes )
+        # step: render the nodes to console
+        puts RundeckNodes::Render.new( nodes, settings[:erb] ).render
       end
     end
 
@@ -51,12 +48,17 @@ module RundeckNodes
       end
     end
 
-    def append_tags nodes = []
+    def append_tags name, nodes = []
       return nodes if settings['tags'].nil? or settings['tags'].empty?
       nodes.each do |host|
-        settings['tags'].each do |regex|
+        # step: add the cloud tag
+        host['cloud'] = name
+        host['tags']  = [] unless host['tags']
+        host['tags'] << name
+        settings['tags'].each_pair do |regex,tags|
+          debug "hostname: #{host['hostname']}, regex: #{regex}, tags: #{tags.join(', ')}"
           next unless host['hostname'] =~ /#{regex}/
-          ( host['tags'] || [] ) << settings['tags'][regex]
+          ( host['tags'] || [] ) << tags
         end
       end
       nodes
