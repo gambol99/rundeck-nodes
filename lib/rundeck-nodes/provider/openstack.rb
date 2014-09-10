@@ -7,10 +7,8 @@
 module RundeckNodes
   module Providers
     class Openstack < Provider
-
       def setup
         validate_configuration
-        openstack
       end
 
       def list
@@ -43,22 +41,6 @@ module RundeckNodes
         openstack.servers || []
       end
 
-      def flavor_name id
-        @flavors ||= openstack.flavors
-        @flavors.each do |x|
-          return x.name if x.id == id or x.name == id
-        end
-        nil
-      end
-
-      def image_name id
-        @images  ||= openstack.images
-        @images.each do |x|
-          return x.name if x.id == id or x.name == id
-        end
-        nil
-      end
-
       def openstack
         @openstack ||= ::Fog::Compute.new( :provider => :OpenStack,
           :openstack_auth_url => configuration['openstack_auth_url'],
@@ -67,15 +49,7 @@ module RundeckNodes
           :openstack_tenant   => configuration['openstack_tenant']
         )
       end
-
-      def validate_configuration
-        debug "validate_configuration: #{configuration}"
-        %w(openstack_auth_url openstack_api_key openstack_username openstack_tenant).each do |x|
-          unless configuration.has_key? x
-            raise ArgumentError, 'the credentials are incomplete, you must have the %s field for %s' % [ x, configuration['name'] ]
-          end
-        end
-      end
+      alias_method :connection, :rackspace
     end
   end
 end

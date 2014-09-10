@@ -42,10 +42,24 @@ module RundeckNodes
         nodes
       end
 
+      def flavor_name id
+        @flavors ||= openstack.flavors
+        @flavors.each do |x|
+          return x.name if x.id == id or x.name == id
+        end
+        nil
+      end
+
+      def image_name id
+        @images  ||= openstack.images
+        @images.each do |x|
+          return x.name if x.id == id or x.name == id
+        end
+        nil
+      end
+
       def configuration; @configuration ||= {}; end
       def options; @options ||= {}; end
-      def server hostname; raise ArgumentError, "the provider server method has not been overloaded"; end
-      def name; raise ArgumentError, "the provider name method has not been overloaded"; end
     end
   end
 end

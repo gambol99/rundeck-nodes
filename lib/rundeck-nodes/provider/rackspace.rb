@@ -19,22 +19,7 @@ module RundeckNodes
           :rackspace_region   => configuration['rackspace_region'],
         )
       end
-
-      def flavor_name id
-        @flavors ||= rackspace.flavors
-        @flavors.each do |x|
-          return x.name if x.id == id or x.name == id
-        end
-        nil
-      end
-
-      def image_name id
-        @images  ||= rackspace.images
-        @images.each do |x|
-          return x.name if x.id == id or x.name == id
-        end
-        nil
-      end
+      alias_method :connection, :rackspace
     end
   end
 end
