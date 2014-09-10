@@ -7,30 +7,11 @@
 module RundeckNodes
   module Providers
     class Rackspace < Provider
-      def list
-        nodes = []
-        rackspace.servers.each do |instance|
-          debug "retrieve_nodes: instance name: #{instance.name}, id: #{instance.id}"
-          node = {
-            'id'        => instance.id,
-            'hostname'  => instance.name,
-            'state'     => instance.state,
-            'key_name'  => instance.key_name,
-            'created'   => instance.created,
-            'tags'      => [],
-            'user_id'   => instance.user_id,
-            'flavor_id' => instance.flavor_id,
-            'image_id'  => instance.image_id,
-            'flavor'    => flavor_name( instance.flavor_id ) || 'deleted',
-            'image'     => image_name( instance.image_id ) || 'deleted'
-          }
-          # step: find the image
-          nodes << node
-        end
-        nodes
+      private
+      def servers
+        ( rackspace.list_servers.body || {} )['servers'] || []
       end
 
-      private
       def rackspace
         @rackspace ||= ::Fog::Compute.new( :provider => :Rackspace,
           :rackspace_username => configuration['rackspace_username'],

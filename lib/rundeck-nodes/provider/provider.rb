@@ -17,10 +17,33 @@ module RundeckNodes
         @id = instance_id
       end
 
-      protected
+      def list
+        nodes = []
+        servers.each do |instance|
+          debug "retrieve_nodes: instance name: #{instance['name']}, id: #{instance['id']}"
+          node = {
+            'id'        => instance['id'],
+            'hostname'  => instance['name'],
+            'state'     => instance['status'],
+            'created'   => instance['created'],
+            'tenant_id' => instance['tenant_id'],
+            'tags'      => [],
+            'user_id'   => instance['user_id'],
+            'key_name'   => instance['key_name']
+          }
+          unless options[:no_details]
+            node['flavor_id'] = instance['flavor']['id']
+            node['image_id']  = instance['image']['id']
+            node['flavor']    = flavor_name( instance['flavor']['id'] ) || 'deleted'
+            node['image']     = image_name( instance['image']['id'] ) || 'deleted'
+          end
+          nodes << node
+        end
+        nodes
+      end
+
       def configuration; @configuration ||= {}; end
       def options; @options ||= {}; end
-      def list; raise ArgumentError, "the provider list method has not been overloaded"; end
       def server hostname; raise ArgumentError, "the provider server method has not been overloaded"; end
       def name; raise ArgumentError, "the provider name method has not been overloaded"; end
     end

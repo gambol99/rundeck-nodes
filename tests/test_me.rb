@@ -10,10 +10,11 @@ require 'rundeck-nodes'
 require 'pp'
 
 options = {
-  :config => './config.yaml',
-  :debug  => false
+  :config     => './config.yaml',
+  :debug      => true,
+  :no_details => true,
 }
 
 nodes = RundeckNodes.load options
 # step: perform a classify
-nodes.list
+nodes.render

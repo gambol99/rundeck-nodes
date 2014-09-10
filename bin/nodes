@@ -39,11 +39,12 @@ module RundeckNodes
 
     def set_default_options
       {
-        :config   => "#{ENV['HOME']}/.rundeck-nodes.yaml",
-        :debug    => false,
-        :clouds   => [],
-        :threaded => false,
-        :action   => :nodes
+        :config     => "#{ENV['HOME']}/.rundeck-nodes.yaml",
+        :debug      => false,
+        :clouds     => [],
+        :threaded   => false,
+        :action     => :nodes,
+        :no_details => false
       }
     end
 
@@ -51,6 +52,7 @@ module RundeckNodes
       @parser ||= OptionScrapper::new do |o|
         o.on( '-c FILE', '--config FILE', "the configuration file containing the settings (defaults: #{options[:config]})" ) { |x| options[:config] = x }
         o.on( '-C CLOUD', '--cloud CLOUD', "only include certain clouds, defaults to all" ) { |x| options[:clouds] << x }
+        o.on( nil, '--no-details', 'dont pull the details on images, flavors etc ') { options[:no_details] = true }
         o.on( '-d', '--debug', 'switch on debugging mode' ) { options[:debug] = true }
         o.on( '-t', '--thread', 'pull the sources threaded' ) { options[:threaded] = true }
       end

@@ -24,7 +24,7 @@ module RundeckNodes
       @settings = load_configuration( options( configuration ) )
     end
 
-    def render cloud_filter, threaded = false
+    def render cloud_filter = '.*', threaded = false
       clouds( cloud_filter ) do |cloud_name,config|
         if threaded
           @threads ||= []

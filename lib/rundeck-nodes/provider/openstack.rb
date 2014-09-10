@@ -15,28 +15,34 @@ module RundeckNodes
 
       def list
         nodes = []
-        openstack.servers.each do |instance|
+        servers.each do |instance|
           debug "list: instance name: #{instance.name}, id: #{instance.id}"
           node = {
             'id'         => instance.id,
             'hostname'   => instance.name,
             'state'      => instance.state,
-            'key_name'   => instance.key_name,
             'created'    => instance.created,
             'tags'       => [],
             'tenant_id'  => instance.tenant_id,
             'user_id'    => instance.user_id,
-            'flavor_id'  => instance.flavor['id'],
-            'image_id'   => instance.image['id'],
-            'flavor'     => flavor_name( instance.flavor['id'] ) || 'deleted',
-            'image'      => image_name( instance.image['id'] ) || 'deleted'
+            'key_name'   => instance.key_name
           }
+          unless options[:no_details]
+            node['flavor_id'] = instance.flavor['id']
+            node['image_id']  = instance.image['id']
+            node['flavor']    = flavor_name( instance.flavor['id'] ) || 'deleted'
+            node['image']     = image_name( instance.image['id'] ) || 'deleted'
+          end
           nodes << node
         end
         nodes
       end
 
       private
+      def servers
+        openstack.servers || []
+      end
+
       def flavor_name id
         @flavors ||= openstack.flavors
         @flavors.each do |x|

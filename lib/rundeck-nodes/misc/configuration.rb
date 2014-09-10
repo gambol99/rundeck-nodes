@@ -17,7 +17,7 @@ module RundeckNodes
   tags: '<%= node['tags'].join(', ') %>'
   username: rundeck
   <% node.each_pair do |k,v| -%>
-<%- next if k =~ /^(hostname|tags)$/ -%>
+<%- next if k =~ /^(hostname|tags)$/ or v.nil? -%>
 <%= k %>: <%= v %>
   <% end -%>
 <% end -%>
