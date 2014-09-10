@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
     s.date        = '2014-07-15'
     s.authors     = ["Rohith Jayawardene"]
     s.email       = 'gambol99@gmail.com'
-    s.homepage    = 'http://rubygems.org/gems/rundeck-nodes'
+    s.homepage    = 'https://github.com/gambol99/rundeck-nodes'
     s.summary     = %q{Integration piece for node resources and rundesk with openstack/rackspace clusters}
     s.description = %q{Integration piece for node resources and rundesk with openstack/rackspace clusters}
     s.license     = 'GPL'
