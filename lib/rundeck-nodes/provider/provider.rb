@@ -43,7 +43,7 @@ module RundeckNodes
       end
 
       def flavor_name id
-        @flavors ||= openstack.flavors
+        @flavors ||= connection.flavors
         @flavors.each do |x|
           return x.name if x.id == id or x.name == id
         end
@@ -51,7 +51,7 @@ module RundeckNodes
       end
 
       def image_name id
-        @images  ||= openstack.images
+        @images  ||= connection.images
         @images.each do |x|
           return x.name if x.id == id or x.name == id
         end
