@@ -7,10 +7,6 @@
 module RundeckNodes
   module Providers
     class Openstack < Provider
-      def setup
-        validate_configuration
-      end
-
       def list
         nodes = []
         servers.each do |instance|
