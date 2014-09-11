@@ -49,7 +49,7 @@ module RundeckNodes
           :openstack_tenant   => configuration['openstack_tenant']
         )
       end
-      alias_method :connection, :rackspace
+      alias_method :connection, :openstack
     end
   end
 end
