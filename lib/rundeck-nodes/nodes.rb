@@ -25,25 +25,37 @@ module RundeckNodes
     end
 
     def render cloud_filter = '.*', threaded = false
-      clouds( cloud_filter ) do |cloud_name,config|
-        if threaded
-          @threads ||= []
-          @sources ||= {}
-          @threads << Thread::new do
-            source cloud_name, config do |data|
-              @sources[cloud_name] = data
-            end
-          end
-          @threads.each(&:join)
-          @sources.each_pair { |name,data| puts data }
-        else
-          source( cloud_name, config ) { |data| puts data }
-        end
+      generate cloud_filter, threaded do |nodes|
+        puts RundeckNodes::Render.new( nodes, settings[:erb] ).render
       end
     end
 
+    def nodes cloud_filter = '.*', threaded = false
+      generate cloud_filter, threaded
+    end
+
     private
-    def source cloud_name, config, &block
+    def generate filter, threaded
+      @sources ||= {}
+      clouds( filter ) do |cloud_name,config|
+        if threaded
+          @threads ||= []
+          @threads << Thread::new do
+            source cloud_name, config do |data|
+              @sources[cloud_name] = data
+              yield @sources[cloud_name] if block_given?
+            end
+          end
+          @threads.each(&:join)
+        else
+          @sources[cloud_name] = source( cloud_name, config )
+          yield @sources[cloud_name] if block_given?
+        end
+      end
+      @sources
+    end
+
+    def source cloud_name, config
       debug "render: cloud: #{cloud_name}, provider: #{config['provider']}"
       # step: find a provider for this cloud
       plugin = provider cloud_name, config['provider'], config
@@ -51,9 +63,7 @@ module RundeckNodes
       debug "render: provider: #{cloud_name}, pulling the hosts from this provider"
       nodes = plugin.list || []
       # step: append the tags to the nodes
-      nodes = append_tags( cloud_name, nodes )
-      # step: render the nodes to console
-      yield RundeckNodes::Render.new( nodes, settings[:erb] ).render
+      append_tags( cloud_name, nodes )
     end
 
     def clouds filter = nil, &block
@@ -74,7 +84,7 @@ module RundeckNodes
         settings['tags'].each_pair do |regex,tags|
           debug "hostname: #{host['hostname']}, regex: #{regex}, tags: #{tags.join(', ')}"
           next unless host['hostname'] =~ /#{regex}/
-          ( host['tags'] || [] ) << tags
+          host['tags'].concat tags
         end
       end
       nodes

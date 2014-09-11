@@ -43,19 +43,25 @@ module RundeckNodes
       end
 
       def flavor_name id
-        @flavors ||= connection.flavors
-        @flavors.each do |x|
+        flavors.each do |x|
           return x.name if x.id == id or x.name == id
         end
         nil
       end
 
       def image_name id
-        @images  ||= connection.images
-        @images.each do |x|
+        images.each do |x|
           return x.name if x.id == id or x.name == id
         end
         nil
+      end
+
+      def flavors
+        @flavors ||= connection.flavors
+      end
+
+      def images
+        @images ||= connection.images
       end
 
       def configuration; @configuration ||= {}; end
